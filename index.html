@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klassik Shifrlash Usullarini Modellashtirish</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            background-color: var(--card-bg);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        button.action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-encrypt {
+            background-color: var(--accent);
+            color: #0f172a;
+        }
+
+        .btn-encrypt:hover {
+            background-color: var(--accent-hover);
+            color: #fff;
+        }
+
+        .btn-decrypt {
+            background-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-decrypt:hover {
+            background-color: #475569;
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--bg-color);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+        }
+
+        .result-box h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .result-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-break: break-all;
+            color: var(--success);
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            max-width: 250px;
+            margin: 1rem 0;
+        }
+
+        .matrix-cell {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 4px;
+            color: var(--accent);
+        }
+
+        .step-log {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            white-space: pre-wrap;
+            max-height: 150px;
+            overflow-y: auto;
+            background: #090d16;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .cipher-panel {
+            display: none;
+        }
+
+        .cipher-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Klassik Shifrlash Modeli</h1>
+        <p>Qoldiqlar arifmetikasi va mantiqiy alifboga asoslangan shifrlash algoritmlari</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('caesar')">Sezar Shifri</button>
+        <button class="tab-btn" onclick="switchTab('vigenere')">Vizhener Shifri</button>
+        <button class="tab-btn" onclick="switchTab('playfair')">Pleyfayr Shifri</button>
+    </div>
+
+    <!-- SEZAR SHIFRI -->
+    <div id="caesar" class="cipher-panel active card">
+        <h2>Sezar Shifri (Caesar Cipher)</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+            Formulalar: $E(x) = (x + k) \pmod{26}$, $D(x) = (x - k) \pmod{26}$
+        </p>
+        <div class="form-group">
+            <label>Kiruvchi matn:</label>
+            <input type="text" id="caesar-text" placeholder="Masalan: HELLO WORLD">
+        </div>
+        <div class="form-group">
+            <label>Kalit (Surilish k-qiymati):</label>
+            <input type="number" id="caesar-key" value="3" min="1" max="25">
+        </div>
+        <div class="btn-group">
+            <button class="action-btn btn-encrypt" onclick="processCaesar(true)">Shifrlash</button>
+            <button class="action-btn btn-decrypt" onclick="processCaesar(false)">Deshifrlash</button>
+        </div>
+        <div class="result-box">
+            <h3>Natija:</h3>
+            <div id="caesar-output" class="result-text">-</div>
+        </div>
+    </div>
+
+    <!-- VIZHENER SHIFRI -->
+    <div id="vigenere" class="cipher-panel card">
+        <h2>Vizhener Shifri (Vigenère Cipher)</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+            Formulalar: $C_i = (P_i + K_i) \pmod{26}$, $P_i = (C_i - K_i) \pmod{26}$
+        </p>
+        <div class="form-group">
+            <label>Kiruvchi matn:</label>
+            <input type="text" id="vigenere-text" placeholder="Masalan: KIPERXAVFSIZLIK">
+        </div>
+        <div class="form-group">
+            <label>Kalit so'z:</label>
+            <input type="text" id="vigenere-key" placeholder="Masalan: KALIT">
+        </div>
+        <div class="btn-group">
+            <button class="action-btn btn-encrypt" onclick="processVigenere(true)">Shifrlash</button>
+            <button class="action-btn btn-decrypt" onclick="processVigenere(false)">Deshifrlash</button>
+        </div>
+        <div class="result-box">
+            <h3>Natija:</h3>
+            <div id="vigenere-output" class="result-text">-</div>
+            <h3 style="margin-top: 1rem;">Hisoblash bosqichlari:</h3>
+            <div id="vigenere-log" class="step-log">Bosqichlar bu yerda ko'rinadi...</div>
+        </div>
+    </div>
+
+    <!-- PLEYFAYR SHIFRI -->
+    <div id="playfair" class="cipher-panel card">
+        <h2>Pleyfayr Shifri (Playfair Cipher)</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+            5x5 o'lchamli alifbo matritsasiga asoslangan bigrammali shifrlash (J harfi I bilan almashtiriladi).
+        </p>
+        <div class="form-group">
+            <label>Kiruvchi matn:</label>
+            <input type="text" id="playfair-text" placeholder="Masalan: SECRET TEXT">
+        </div>
+        <div class="form-group">
+            <label>Kalit so'z:</label>
+            <input type="text" id="playfair-key" placeholder="Masalan: MONARCHY">
+        </div>
+        <div class="btn-group">
+            <button class="action-btn btn-encrypt" onclick="processPlayfair(true)">Shifrlash</button>
+            <button class="action-btn btn-decrypt" onclick="processPlayfair(false)">Deshifrlash</button>
+        </div>
+        
+        <h3 style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">YARATILGAN 5x5 MATRITSA:</h3>
+        <div id="playfair-matrix" class="matrix-grid"></div>
+
+        <div class="result-box">
+            <h3>Natija:</h3>
+            <div id="playfair-output" class="result-text">-</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tablarni almashtirish
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.cipher-panel').forEach(panel => panel.classList.remove('active'));
+        
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // Yordamchi: faqat ingliz alifbosi harflarini ajratish
+    function cleanInput(str) {
+        return str.toUpperCase().replace(/[^A-Z]/g, '');
+    }
+
+    // 1. SEZAR SHIFRI
+    function processCaesar(isEncrypt) {
+        let text = document.getElementById('caesar-text').value;
+        let shift = parseInt(document.getElementById('caesar-key').value) || 0;
+        if (!isEncrypt) shift = (26 - (shift % 26)) % 26;
+
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            let char = text[i];
+            if (char.match(/[a-z]/i)) {
+                let code = text.charCodeAt(i);
+                // Katta harflar
+                if (code >= 65 && code <= 90) {
+                    char = String.fromCharCode(((code - 65 + shift) % 26) + 65);
+                }
+                // Kichik harflar
+                else if (code >= 97 && code <= 122) {
+                    char = String.fromCharCode(((code - 97 + shift) % 26) + 97);
+                }
+            }
+            result += char;
+        }
+        document.getElementById('caesar-output').innerText = result || '-';
+    }
+
+    // 2. VIZHENER SHIFRI
+    function processVigenere(isEncrypt) {
+        let rawText = document.getElementById('vigenere-text').value;
+        let rawKey = document.getElementById('vigenere-key').value;
+        
+        let text = cleanInput(rawText);
+        let key = cleanInput(rawKey);
+
+        if (!text || !key) {
+            alert("Iltimos, matn va kalitni to'g'ri kiriting!");
+            return;
+        }
+
+        let result = '';
+        let log = '';
+        let keyIndex = 0;
+
+        for (let i = 0; i < text.length; i++) {
+            let pChar = text[i];
+            let kChar = key[keyIndex % key.length];
+            
+            let pVal = pChar.charCodeAt(0) - 65;
+            let kVal = kChar.charCodeAt(0) - 65;
+            let cVal;
+
+            if (isEncrypt) {
+                cVal = (pVal + kVal) % 26;
+                log += `P:${pChar}(${pVal}) + K:${kChar}(${kVal}) = ${cVal} mod 26 -> ${String.fromCharCode(cVal + 65)}\n`;
+            } else {
+                cVal = (pVal - kVal + 26) % 26;
+                log += `C:${pChar}(${pVal}) - K:${kChar}(${kVal}) = ${cVal} mod 26 -> ${String.fromCharCode(cVal + 65)}\n`;
+            }
+
+            result += String.fromCharCode(cVal + 65);
+            keyIndex++;
+        }
+
+        document.getElementById('vigenere-output').innerText = result;
+        document.getElementById('vigenere-log').innerText = log;
+    }
+
+    // 3. PLEYFAYR SHIFRI
+    function generatePlayfairMatrix(key) {
+        let cleanedKey = cleanInput(key).replace(/J/g, 'I');
+        let alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"; // J o'rniga I
+        let used = new Set();
+        let matrix = [];
+
+        for (let char of cleanedKey + alphabet) {
+            if (!used.has(char)) {
+                used.add(char);
+                matrix.push(char);
+            }
+        }
+        return matrix;
+    }
+
+    function renderPlayfairMatrix(matrix) {
+        const container = document.getElementById('playfair-matrix');
+        container.innerHTML = '';
+        matrix.forEach(char => {
+            const cell = document.createElement('div');
+            cell.className = 'matrix-cell';
+            cell.innerText = char;
+            container.appendChild(cell);
+        });
+    }
+
+    function processPlayfair(isEncrypt) {
+        let rawText = document.getElementById('playfair-text').value;
+        let rawKey = document.getElementById('playfair-key').value;
+
+        let text = cleanInput(rawText).replace(/J/g, 'I');
+        let key = cleanInput(rawKey);
+
+        if (!text || !key) {
+            alert("Iltimos, matn va kalitni kiriting!");
+            return;
+        }
+
+        let matrix = generatePlayfairMatrix(key);
+        renderPlayfairMatrix(matrix);
+
+        // Matnni bigrammalarga ajratish
+        let preparedText = "";
+        for (let i = 0; i < text.length; i++) {
+            preparedText += text[i];
+            if (i < text.length - 1) {
+                if (text[i] === text[i + 1]) {
+                    preparedText += 'X';
+                }
+            }
+        }
+        if (preparedText.length % 2 !== 0) preparedText += 'X';
+
+        let result = "";
+        
+        for (let i = 0; i < preparedText.length; i += 2) {
+            let a = preparedText[i];
+            let b = preparedText[i + 1];
+
+            let idxA = matrix.indexOf(a);
+            let idxB = matrix.indexOf(b);
+
+            let rowA = Math.floor(idxA / 5), colA = idxA % 5;
+            let rowB = Math.floor(idxB / 5), colB = idxB % 5;
+
+            if (rowA === rowB) {
+                // Bir xil qatorda
+                let shift = isEncrypt ? 1 : 4;
+                colA = (colA + shift) % 5;
+                colB = (colB + shift) % 5;
+            } else if (colA === colB) {
+                // Bir xil ustunda
+                let shift = isEncrypt ? 1 : 4;
+                rowA = (rowA + shift) % 5;
+                rowB = (rowB + shift) % 5;
+            } else {
+                // To'rtburchak hosil qilganda
+                let temp = colA;
+                colA = colB;
+                colB = temp;
+            }
+
+            result += matrix[rowA * 5 + colA] + matrix[rowB * 5 + colB];
+        }
+
+        document.getElementById('playfair-output').innerText = result;
+    }
+</script>
+
+</body>
+</html>
